@@ -1,0 +1,16 @@
+---
+title: "synoptic_workspace"
+author: "Zack Grzywacz"
+date: "March 2, 2021"
+output: html_document
+---
+
+```{r}
+daily <- read.csv("./data/SOM_daily_z500_anomaly_3_3.txt")
+```
+
+```{r}
+
+```
+
+
