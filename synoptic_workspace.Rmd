@@ -6,11 +6,68 @@ output: html_document
 ---
 
 ```{r}
-daily <- read.csv("./data/SOM_daily_z500_anomaly_3_3.txt")
+daily <- read.delim("./data/SOM_daily_z500_anomaly_3_3.txt", sep = " ")
 ```
+
+
+Here:
+Basically creating the same dataset Udy did, where each season has detailed counts.
+
+Also: treat it as a time series w/monthly percentages
+
+```{r}
+daily$year <- substr(daily$date, 1, 4)
+daily$month <- substr(daily$date, 5,6)
+daily$year <- as.numeric(daily$year)
+daily$month <- as.numeric(daily$month)
+```
+
+
+```{r}
+daily$season <- NA
+for (x in 1:nrow(daily))
+{
+  if (daily$month[x] == 12 | daily$month[x] == 1 | daily$month[x] == 2){
+    daily$season[x] <- 'DJF'
+  }
+  else if (daily$month[x] == 3 | daily$month[x] == 4 | daily$month[x] == 5){
+    daily$season[x] <- 'MAM'
+  }
+  else if (daily$month[x] == 6 | daily$month[x] == 7 | daily$month[x] == 8){
+    daily$season[x] <- 'JJA'
+  }
+  else if (daily$month[x] == 9 | daily$month[x] == 10 | daily$month[x] == 11){
+    daily$season[x] <- 'SON'
+  }
+}
+```
+
+
+*Note: June - May might be the "year" to look at (number assigned being June - Dec year)
+```{r}
+daily$seas_yr <- 0
+for (x in 1:nrow(daily))
+{
+  if (daily[x,4] == 1 | daily[x,4] == 2)
+  {
+    daily$seas_yr[x] <- (daily$year[x]-1)
+  }
+  else
+  {
+    daily$seas_yr[x] <- daily$year[x]
+  }
+}
+```
+
+```{r}
+split_years <- split(daily, daily$year)
+split_seasons <- split(daily,daily$seas_yr)
+```
+
 
 ```{r}
 
 ```
+
 
 
