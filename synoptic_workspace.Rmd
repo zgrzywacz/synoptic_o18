@@ -6,6 +6,11 @@ output: html_document
 ---
 
 ```{r}
+library(dplyr)
+```
+
+
+```{r}
 daily <- read.delim("./data/SOM_daily_z500_anomaly_3_3.txt", sep = " ")
 ```
 
@@ -59,15 +64,37 @@ for (x in 1:nrow(daily))
 }
 ```
 
+
 ```{r}
-split_years <- split(daily, daily$year)
-split_seasons <- split(daily,daily$seas_yr)
+daily_summary <- daily %>% group_by(seas_yr, season, node) %>% summarise(n=n())
+daily_summary_yrs <- daily %>% group_by(seas_yr, node) %>% summarise(n=n())
+```
+
+```{r}
+split_years <- split(daily_summary_yrs, daily_summary_yrs$seas_yr)
+```
+
+```{r}
+split_years[["1979"]] %>% group_by(node) %>% summarise(percent = n/sum(split_years[["1979"]]$n)*100)
+```
+
+```{r}
+yr_range <- c(1979:2017)
+nodes <- 1:9
+summarized <- data.frame("SOM1"=double(),"SOM2"=double(),"SOM3"=double(),"SOM4"=double(),"SOM5"=double(),"SOM6"=double(),"SOM7"=double(),"SOM8"=double(),"SOM9"=double())
+for (year in 1979:2017)
+{
+  yr <- toString(year)
+  datapoint <- data.frame(t(split_years[[yr]] %>% group_by(node) %>% summarise(percent = n/sum(split_years[[yr]]$n)*100)))
+  rownames(datapoint) <- NULL
+  names(datapoint) <- names(summarized)
+  summarized <- rbind(summarized,datapoint[2,])
+}
+row.names(summarized) <- yr_range
 ```
 
 
 ```{r}
-
+datapoint[2,]
 ```
-
-
 
