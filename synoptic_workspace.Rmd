@@ -7,6 +7,7 @@ output: html_document
 
 ```{r}
 library(dplyr)
+library(DataCombine)
 ```
 
 
@@ -82,10 +83,6 @@ split_years <- split(daily_summary_yrs, daily_summary_yrs$seas_yr)
 ```
 
 ```{r}
-split_years[["1979"]] %>% group_by(node) %>% summarise(percent = n/sum(split_years[["1979"]]$n)*100)
-```
-
-```{r}
 yr_range <- c(1979:2017)
 nodes <- 1:9
 summarized <- data.frame("SOM1"=double(),"SOM2"=double(),"SOM3"=double(),"SOM4"=double(),"SOM5"=double(),"SOM6"=double(),"SOM7"=double(),"SOM8"=double(),"SOM9"=double())
@@ -138,5 +135,136 @@ DJF_summary <- summarize_SOM_data(DJF_daily)
 MAM_summary <- summarize_SOM_data(MAM_daily)
 ```
 
+
+
+
+
+
+
+```{r}
+cg_DJF <- read.csv("data/CG_DJF_means.csv")
+summer_mean <- mean(cg_DJF$DJF_Mean)
+cg_DJF$anom <- (cg_DJF$DJF_Mean - summer_mean)
+rownames(cg_DJF) <- cg_DJF[,1]
+cg_DJF[,1] <- NULL
+cg_DJF
+DJF_full <- merge(DJF_summary,cg_DJF,by=0)
+rownames(DJF_full) <- DJF_full[,1]
+DJF_full[,1] <- NULL
+```
+
+```{r}
+DJF_corrs <- cor(DJF_full, method = c("pearson", "kendall", "spearman"))
+```
+
+
+```{r}
+cg_SON <- read.csv("data/CG_SON_means.csv")
+season_mean <- mean(cg_SON$SON_Mean)
+cg_SON$anom <- (cg_SON$SON_Mean - season_mean)
+rownames(cg_SON) <- cg_SON[,1]
+cg_SON[,1] <- NULL
+cg_SON
+SON_full <- merge(SON_summary,cg_SON,by=0)
+rownames(SON_full) <- SON_full[,1]
+SON_full[,1] <- NULL
+```
+
+```{r}
+SON_corrs <- cor(SON_full, method = c("pearson", "kendall", "spearman"))
+```
+
+```{r}
+cg_MAM <- read.csv("data/CG_MAM_means.csv")
+season_mean <- mean(cg_MAM$MAM_Mean)
+cg_MAM$anom <- (cg_MAM$MAM_Mean - season_mean)
+rownames(cg_MAM) <- cg_MAM[,1]
+cg_MAM[,1] <- NULL
+cg_MAM
+MAM_full <- merge(MAM_summary,cg_MAM,by=0)
+rownames(MAM_full) <- MAM_full[,1]
+MAM_full[,1] <- NULL
+```
+
+```{r}
+MAM_corrs <- cor(MAM_full, method = c("pearson", "kendall", "spearman"))
+```
+
+```{r}
+cg_JJA <- read.csv("data/CG_JJA_means.csv")
+season_mean <- mean(cg_JJA$JJA_Mean)
+cg_JJA$anom <- (cg_JJA$JJA_Mean - season_mean)
+rownames(cg_JJA) <- cg_JJA[,1]
+cg_JJA[,1] <- NULL
+cg_JJA
+JJA_full <- merge(JJA_summary,cg_JJA,by=0)
+rownames(JJA_full) <- JJA_full[,1]
+JJA_full[,1] <- NULL
+```
+
+```{r}
+JJA_corrs <- cor(JJA_full, method = c("pearson", "kendall", "spearman"))
+```
+
+
+```{r}
+SON_corrs
+```
+
+```{r}
+plot(DJF_full$DJF_Mean, DJF_full$SOM3)
+```
+
+
+
+
+
+**Working with monthly**
+
+
+```{r}
+monthlies <- daily %>% group_by(year, month, node) %>% summarise(n=n())
+```
+
+
+
+
+```{r}
+split_months <- split(monthlies, monthlies$month)
+monthlist <- vector(mode = "list", length = 0)
+for (x in 1:12){
+  mo <- toString(x)
+  templist <- split(split_months[[mo]], split_months[[mo]]$year)
+  monthlist[[mo]] <- templist 
+}
+```
+
+
+
+This works but give the rows names like (01-79) somehow
+```{r}
+yr_range <- c(1979:2017)
+nodes <- 1:9
+MonthSummary <- data.frame("SOM1"=double(),"SOM2"=double(),"SOM3"=double(),"SOM4"=double(),"SOM5"=double(),"SOM6"=double(),"SOM7"=double(),"SOM8"=double(),"SOM9"=double())
+for (year in 1979:2017)
+{
+  yr <- toString(year)
+  for (month in 1:12){
+    mo <- toString(month)
+    for (num in 1:9){
+      if (num %in% monthlist[[mo]][[yr]]$node == 'FALSE'){
+        newrow <- c(year,month,num,0)  
+        names(newrow) <- c("year","month","node","n")
+        monthlist[[mo]][[yr]] <- rbind(monthlist[[mo]][[yr]], newrow)
+        }
+      }
+    datapoint <- data.frame(t(monthlist[[mo]][[yr]] %>% group_by(node) %>% summarise(percent = n/sum(monthlist[[mo]][[yr]]$n)*100)))
+    rownames(datapoint) <- NULL
+    names(datapoint) <- names(MonthSummary)
+    MonthSummary <- rbind(MonthSummary,datapoint[2,])
+  }
+}
+
+```
 
 
