@@ -241,7 +241,6 @@ for (x in 1:12){
 
 
 
-This works but give the rows names like (01-79) somehow
 ```{r}
 yr_range <- c(1979:2017)
 nodes <- 1:9
@@ -264,7 +263,46 @@ for (year in 1979:2017)
     MonthSummary <- rbind(MonthSummary,datapoint[2,])
   }
 }
-
+m <- rep(01:12, 39)
+y <- rep(1979:2017, each=12)
+row.names(MonthSummary) <- paste(m,y, sep = "-", collapse = NULL)
 ```
+
+
+```{r}
+full_CG <- read.csv("./data/CG_GNIP.csv")
+rownames(full_CG) <- full_CG[,1]
+full_CG[,1] <- NULL
+```
+
+
+
+```{r}
+monthly_CG <- merge(MonthSummary,full_CG,by=0)
+rownames(monthly_CG) <- monthly_CG[,1]
+monthly_CG[,1] <- NULL
+```
+
+```{r}
+cor(na.omit(monthly_CG))
+```
+
+Compositing:
+
+```{r}
+top10o18 <- top_n(monthly_CG, 10)
+bottom10o18 <- top_n(monthly_CG, -10)
+colMeans(top10o18)
+colMeans(bottom10o18)
+```
+
+
+Anomalies:
+
+```{r}
+monthly_mean <- mean(na.omit(monthly_CG$O18))
+monthly_CG$anom <- (monthly_CG$O18 - monthly_mean)
+```
+
 
 
