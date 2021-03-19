@@ -8,6 +8,8 @@ output: html_document
 ```{r}
 library(dplyr)
 library(DataCombine)
+library(ggplot2)
+library(reshape2)
 ```
 
 
@@ -303,6 +305,24 @@ Anomalies:
 monthly_mean <- mean(na.omit(monthly_CG$O18))
 monthly_CG$anom <- (monthly_CG$O18 - monthly_mean)
 ```
+
+
+
+
+
+
+
+
+Bar plots
+
+```{r}
+SON_full$Year <- rownames(SON_full)
+```
+
+```{r}
+ggplot() + geom_bar(SON_full, mapping = aes(x = Year,y = SOM3), stat='identity')+geom_line(SON_full, mapping = aes(x=Year, y=anom), group = 1, col = 'red')
+```
+
 
 
 
