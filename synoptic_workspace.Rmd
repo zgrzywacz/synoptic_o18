@@ -4,6 +4,11 @@ author: "Zack Grzywacz"
 date: "March 2, 2021"
 output: html_document
 ---
+```{r}
+install.packages("bbplot")
+```
+
+
 
 ```{r}
 library(dplyr)
@@ -210,7 +215,7 @@ JJA_corrs <- cor(JJA_full, method = c("pearson", "kendall", "spearman"))
 
 
 ```{r}
-SON_corrs
+DJF_corrs
 ```
 
 ```{r}
@@ -298,6 +303,14 @@ colMeans(top10o18)
 colMeans(bottom10o18)
 ```
 
+```{r}
+top5DJF <- top_n(DJF_full, 5)
+bottom5DJF <- top_n(DJF_full, -5)
+colMeans(top5DJF)
+colMeans(bottom5DJF)
+```
+
+
 
 Anomalies:
 
@@ -316,13 +329,38 @@ monthly_CG$anom <- (monthly_CG$O18 - monthly_mean)
 Bar plots
 
 ```{r}
-SON_full$Year <- rownames(SON_full)
+MAM_full$Year <- rownames(MAM_full)
 ```
 
 ```{r}
-ggplot() + geom_bar(SON_full, mapping = aes(x = Year,y = SOM3), stat='identity')+geom_line(SON_full, mapping = aes(x=Year, y=anom), group = 1, col = 'red')
+ggplot() + geom_bar(MAM_full, mapping = aes(x = Year,y = SOM3), stat='identity')+geom_line(MAM_full, mapping = aes(x=Year, y=anom), group = 1, col = 'red')
 ```
 
 
 
+
+
+
+
+
+
+
+
+```{r}
+monthly_CG$date <- rownames(monthly_CG)
+monthly_CG$date <- paste0("15-", monthly_CG$date)
+```
+
+```{r}
+monthly_CG$date <- as.Date(monthly_CG$date, "%d-%m-%Y")
+```
+
+```{r}
+monthly_CG[order(monthly_CG$date),]
+```
+
+
+```{r}
+ggplot() + geom_bar(monthly_CG, mapping = aes(x = date,y = SOM8), stat='identity')+geom_line(monthly_CG, mapping = aes(x=date, y=anom), group = 1, col = 'red')
+```
 
